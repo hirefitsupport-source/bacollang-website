@@ -13,13 +13,14 @@ import { buttonClass, Container } from "./ui";
 export function Logo({ lang, inverted = false }: { lang: Locale; inverted?: boolean }) {
   const d = getDict(lang);
   return (
-    <Link href={localize(lang, "/")} className="flex items-center gap-3" aria-label={`${site.name} — ${d.homeAria}`}>
-      <Image src="/images/logo.png" alt="" width={52} height={52} className="h-12 w-12 shrink-0 rounded-full bg-white" priority />
-      <span className="leading-tight">
-        <span className={`block font-display text-base font-bold whitespace-nowrap ${inverted ? "text-white" : "text-brand-dark"}`}>
+    <Link href={localize(lang, "/")} className="flex min-w-0 items-center gap-2 sm:gap-3" aria-label={`${site.name} — ${d.homeAria}`}>
+      <Image src="/images/logo.png" alt="" width={52} height={52} className="h-10 w-10 shrink-0 rounded-full bg-white sm:h-12 sm:w-12" priority />
+      <span className="min-w-0 leading-tight">
+        <span className={`block font-display text-sm font-bold sm:text-base sm:whitespace-nowrap ${inverted ? "text-white" : "text-brand-dark"}`}>
           {site.shortName}
         </span>
-        <span className={`block max-w-60 text-[10px] font-medium tracking-wide uppercase ${inverted ? "text-white/70" : "text-muted"}`}>
+        {/* Subtitle is dropped on narrow phones so the menu and language buttons fit. */}
+        <span className={`hidden max-w-60 text-[10px] font-medium tracking-wide uppercase sm:block ${inverted ? "text-white/70" : "text-muted"}`}>
           {d.logoSubtitle}
         </span>
       </span>
@@ -55,7 +56,7 @@ export function Header() {
       hrefLang={otherLang}
       lang={otherLang}
       aria-label={d.switchToAria}
-      className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-3 text-sm font-semibold text-brand-dark transition-colors hover:border-brand hover:text-brand ${extra}`}
+      className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-2.5 text-sm font-semibold sm:px-3 text-brand-dark transition-colors hover:border-brand hover:text-brand ${extra}`}
     >
       <Globe className="h-4 w-4" aria-hidden />
       {otherLang.toUpperCase()}
@@ -65,7 +66,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="h-1 bg-gradient-to-r from-brand via-accent to-brand" />
-      <Container className="flex h-20 items-center justify-between gap-3">
+      <Container className="flex h-16 items-center justify-between gap-2 sm:h-20 sm:gap-3">
         <Logo lang={lang} />
         <nav aria-label={d.mainNav} className="hidden xl:block">
           <ul className="flex items-center">
@@ -84,7 +85,7 @@ export function Header() {
             ))}
           </ul>
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {switcher()}
           <Link href={localize(lang, "/apply")} className={buttonClass("primary", "hidden h-11 shrink-0 whitespace-nowrap sm:inline-flex")}>
             {d.applyNow}
