@@ -6,6 +6,7 @@ import { z } from "zod";
 import { getDict, type Dict } from "@/lib/dictionaries";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { site } from "@/lib/site";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export type EnquiryState = {
   status: "idle" | "success" | "error";
@@ -72,13 +73,38 @@ export async function submitEnquiry(_prev: EnquiryState, formData: FormData): Pr
   const d = parsed.data;
   const subject = `Website enquiry${lang === "fr" ? " (FR)" : ""}${d.interest ? `: ${d.interest}` : ""} — ${d.fullName}`;
   const success: EnquiryState = { status: "success", message: t.success(d.fullName.split(" ")[0], site.shortName) };
+  // Save to Supabase (when configured) and email admissions. The visitor sees success
+  // if at least one of the two actually worked, so an enquiry is never silently lost.
+  const [saved, emailed] = await Promise.all([saveEnquiry(d, lang), emailEnquiry(d, subject)]);
+  return saved || emailed ? success : fail({ message: t.errors.failed });
+}
+
+type Enquiry = z.infer<ReturnType<typeof makeSchema>>;
+
+async function saveEnquiry(d: Enquiry, lang: Locale): Promise<boolean> {
+  const db = getSupabaseAdmin();
+  if (!db) return false;
+  const { error } = await db.from("enquiries").insert({
+    full_name: d.fullName,
+    email: d.email,
+    phone: d.phone || null,
+    interest: d.interest || null,
+    study_area: d.studyArea || null,
+    message: d.message,
+    language: lang,
+  });
+  if (error) console.error("Enquiry save failed (Supabase)", error);
+  return !error;
+}
+
+async function emailEnquiry(d: Enquiry, subject: string): Promise<boolean> {
   const to = process.env.ENQUIRY_TO_EMAIL || site.emails[0];
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.ENQUIRY_FROM_EMAIL;
 
   // Without Resend configured, deliver through FormSubmit (no account or key needed).
   // The first enquiry triggers a one-time activation email to `to`; until that link
-  // is clicked FormSubmit reports failure, so the visitor never sees a false success.
+  // is clicked FormSubmit reports failure.
   if (!apiKey || !from) {
     try {
       const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(to)}`, {
@@ -101,9 +127,9 @@ export async function submitEnquiry(_prev: EnquiryState, formData: FormData): Pr
       if (!res.ok || String(body.success) !== "true") throw new Error(body.message ?? `HTTP ${res.status}`);
     } catch (err) {
       console.error("Enquiry send failed (FormSubmit)", err);
-      return fail({ message: t.errors.failed });
+      return false;
     }
-    return success;
+    return true;
   }
 
   const rows: [string, string | undefined][] = [
@@ -129,8 +155,7 @@ export async function submitEnquiry(_prev: EnquiryState, formData: FormData): Pr
     if (error) throw new Error(error.message);
   } catch (err) {
     console.error("Enquiry send failed", err);
-    return fail({ message: t.errors.failed });
+    return false;
   }
-
-  return success;
+  return true;
 }
