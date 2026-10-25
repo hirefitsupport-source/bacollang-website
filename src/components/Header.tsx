@@ -87,7 +87,7 @@ export function Header() {
         </nav>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           {switcher()}
-          <Link href={localize(lang, "/apply")} className={buttonClass("primary", "hidden h-11 shrink-0 whitespace-nowrap sm:inline-flex")}>
+          <Link href={localize(lang, "/apply")} className={buttonClass("primary", "h-11 shrink-0 whitespace-nowrap max-sm:hidden")}>
             {d.applyNow}
           </Link>
           <button
