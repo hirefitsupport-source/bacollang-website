@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #123b8a;
+  --color-brand-dark: #0b1f49;
+  --color-brand-light: #f2f6fc;
+  --color-accent: #e31b23;
+  --color-accent-dark: #b9141b;
+  --color-surface: #f7f8fa;
+  --color-ink: #202938;
+  --color-muted: #5b6b80;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero text: each child of an active slide fades up in turn. */
+.hero-animate > * {
+  opacity: 0;
+  animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.hero-animate > :nth-child(1) { animation-delay: 0.15s; }
+.hero-animate > :nth-child(2) { animation-delay: 0.3s; }
+.hero-animate > :nth-child(3) { animation-delay: 0.5s; }
+.hero-animate > :nth-child(4) { animation-delay: 0.7s; }
+
+/* Base styles live in the base layer so Tailwind utilities (e.g. text-white) override them. */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-brand-dark);
+    line-height: 1.2;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
